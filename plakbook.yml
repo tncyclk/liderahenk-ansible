@@ -1,0 +1,19 @@
+- name: My first play
+  hosts: db_server
+  become: yes
+  roles:
+    - mariadb
+
+  # tasks:
+  #   - name: Ping my hosts
+  #     ansible.builtin.ping:
+  #   - name: Print message
+  #     ansible.builtin.debug:
+  #       msg: Ping is OK
+  #   - name: Install htop  (state=present is optional)
+  #     ansible.builtin.apt:
+  #       name: mariadb-server
+  #       state: present
+  #   - name: Print message
+  #     ansible.builtin.debug:
+  #       msg: htop is installed

@@ -1,0 +1,66 @@
+- name: Install MariaDB package
+  ansible.builtin.apt:
+    name:
+      - mariadb-server
+      - python3-mysqldb
+    state: present
+
+- name: Print message
+  ansible.builtin.debug:
+    msg: mariadb-server is installed
+
+- name: Create Mysql configuration file
+  ansible.builtin.copy:
+      src: templates/my.cnf.j2
+      dest: /etc/my.cnf
+      owner: root
+      group: root
+      mode: '0644'
+  # template: src=templates/my.cnf.j2 dest=/etc/my.cnf
+
+- name: Start MariaDB Service
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: yes
+# - name: Start MariaDB Service
+#   service: name=mariadb state=started enabled=yes
+
+# - name: Start firewalld
+#   service: name=firewalld state=started enabled=yes
+
+# - name: insert firewalld rule
+#   firewalld: port={{ mysql_port }}/tcp permanent=true state=enabled immediate=yes
+
+- name: Create a new database with name 'lidermysdb'
+  community.mysql.mysql_db:
+    name: lidermysdb
+    state: present
+    login_unix_socket: /run/mysqld/mysqld.sock
+
+
+# - name: Create database user with name 'bob' and password '12345' with all database privileges
+#   community.mysql.mysql_user:
+#     name: root
+#     password: 12345
+#     priv: '*.*:ALL'
+#     state: present
+
+- name: Create database user with name 'bob' and password '12345' with all database privileges
+  community.mysql.mysql_user:
+    name: bob
+    password: 12345
+    priv: '*.*:ALL'
+    state: present
+
+- name: Create database user using hashed password with all database privileges
+  community.mysql.mysql_user:
+    name: bob
+    password: '*EE0D72C1085C46C5278932678FBE2C6A782821B4'
+    encrypted: true
+    priv: '*.*:ALL'
+    state: present
+
+- name: Print message
+  ansible.builtin.debug:
+    msg: mariadb-server is done
