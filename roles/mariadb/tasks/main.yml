@@ -1,75 +1,8 @@
-- name: Change file ownership, group and permissions
-  ansible.builtin.file:
-    path: "/tmp/{{ file_name }}"
-    state: directory
-    mode: '0755'
+---
+- name: Install MySQL
+  include_tasks: mariadb.yml
+  when: "{{ type == 1 }}"
 
-- name: MariaDB | Preset root password
-  ansible.builtin.debconf:
-    name: mariadb-server
-    question: "{{ item }}"
-    vtype: password
-    value: "{{ db_password }}"
-  with_items:
-      - mysql-server/root_password
-      - mysql-server/root_password_again
-
-- name: Install MariaDB package
-  ansible.builtin.apt:
-    name:
-      - mariadb-server
-      - python3-mysqldb
-    state: present
-
-- name: Print message
-  ansible.builtin.debug:
-    msg: mariadb-server is installed
-
-- name: Create Mysql configuration file
-  ansible.builtin.copy:
-      src: templates/my.cnf.j2
-      dest: /etc/my.cnf
-      owner: root
-      group: root
-      mode: '0644'
-  # template: src=templates/my.cnf.j2 dest=/etc/my.cnf
-
-- name: Start MariaDB Service
-  ansible.builtin.service:
-    name: mariadb
-    state: started
-    enabled: yes
-
-- name: Create a new database with name 'lidermysdb'
-  community.mysql.mysql_db:
-    name: "{{ db_name }}"
-    state: present
-    login_unix_socket: /run/mysqld/mysqld.sock
-
-- name: Create database user with name 'bob' and password '12345' with all database privileges
-  community.mysql.mysql_user:
-    name: "{{ db_name }}"
-    password: 12345
-    priv: '*.*:ALL'
-    state: present
-
-- name: Create database user using hashed password with all database privileges
-  community.mysql.mysql_user:
-    name: "{{ db_name }}"
-    password: '*EE0D72C1085C46C5278932678FBE2C6A782821B4'
-    encrypted: true
-    priv: '*.*:ALL'
-    state: present
-
-- name: Create table
-  community.mysql.mysql_db:
-    login_user: "{{ db_user }}"
-    login_password: "{{ db_password }}"
-    login_host: ALL
-    login_port: "{{ mysql_port }}"
-    db: "{{ db_name }}"
-    sql: "CREATE TABLE c_config (config_id INT NOT NULL, create_date VARCHAR(45) NOT NULL, modify_date VARCHAR(45) NULL, name VARCHAR(45) NOT NULL, value LONGTEXT NULL, PRIMARY KEY (config_id));"
-
-- name: Print message
-  ansible.builtin.debug:
-    msg: mariadb-server is done
+- name: Create Folder
+  include_tasks: test.yml
+  when: "{{ type == 2 }}"
